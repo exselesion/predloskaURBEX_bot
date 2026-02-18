@@ -5,14 +5,6 @@ import sqlite3
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message
 from aiogram.filters import CommandStart
-import os
-from aiohttp import web
-
-async def handle(request):
-    return web.Response(text="Bot is running")
-
-app = web.Application()
-app.router.add_get("/", handle)
 
 API_TOKEN = "8368307123:AAFcIaT0sGIx9qCqP0K2o0oTXATUcxGEXas"
 ADMIN_IDS = {5207844420}  # telegram_id админов
@@ -123,10 +115,26 @@ async def admin_message(message: Message):
 
     await bot.send_message(telegram_id, lines[1])
 
+if __name__ == '__main__':
+    import threading
+    from http.server import HTTPServer, BaseHTTPRequestHandler
 
-async def main():
-    await dp.start_polling(bot)
+    # Мини-сервер-заглушка
+    class RenderDummyHandler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b"Bot is running.")
 
+    def run_dummy_server():
+        import os
+        port = int(os.environ.get("PORT", 10000))  # Render требует переменную PORT
+        server = HTTPServer(('', port), RenderDummyHandler)
+        server.serve_forever()
 
-if __name__ == "__main__":
-    web.run_app(app, port=os.getenv("PORT", 10000))
+    # Запуск HTTP-сервера в отдельном потоке
+    threading.Thread(target=run_dummy_server).start()
+
+    # Запуск Telegram-бота
+    asyncio.run(dp.start_polling(bot))
+
