@@ -5,6 +5,14 @@ import sqlite3
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message
 from aiogram.filters import CommandStart
+import os
+from aiohttp import web
+
+async def handle(request):
+    return web.Response(text="Bot is running")
+
+app = web.Application()
+app.router.add_get("/", handle)
 
 API_TOKEN = "8368307123:AAFcIaT0sGIx9qCqP0K2o0oTXATUcxGEXas"
 ADMIN_IDS = {5207844420}  # telegram_id админов
@@ -121,4 +129,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    web.run_app(app, port=os.getenv("PORT", 10000))
